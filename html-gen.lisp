@@ -1,3 +1,5 @@
+(in-package :html-gen)
+
 ;; The void elements according to http://www.w3.org/TR/html-markup/syntax.html#void-element
 (defparameter *void-elements* '(:area :base :br :col :command :embed :hr :img 
 				:input :keygen :link :meta :param :source :track :wbr))
@@ -13,6 +15,8 @@
     (if source (rec source nil) nil)))
 
 (defun attrs-to-html (attrs)
+  "With a list (foo \"bar\" monkey \"banana\"), return the string ' foo=\"bar\" monkey=\"banana\"'.
+If attrs is null, return \"\"."
   (if (null attrs) ""
       (let ((grouped-attrs (group attrs 2)))
 	(with-output-to-string (str)
@@ -25,9 +29,10 @@
        (listp (cadr form))))
 
 (defun void-element-p (tag)
+  "Return t if the tag, being a keyword, is a void element."
   (if (find tag *void-elements*) t nil))
 
-(defmacro html (&rest statements)
+(defun html (&rest statements)
   (with-output-to-string (str)
     (labels ((generate-html-tag (tag attrs &rest values)
 	       ;; first get the tag as a lowercase string and the attributes written correctly
