@@ -14,13 +14,18 @@
                    (nreverse (cons source acc))))))
     (if source (rec source nil) nil)))
 
+(defmacro with-gensyms ((&rest names) &body body)
+  `(let ,(loop for n in names collect `(,n  (gensym (concatenate 'string (string ',n) "-GENSYM-"))))
+     ,@body))
+
+
 (defun attrs-to-html (attrs)
   "With a list (foo \"bar\" monkey \"banana\"), return the string ' foo=\"bar\" monkey=\"banana\"'.
 If attrs is null, return \"\"."
   (if (null attrs) ""
       (let ((grouped-attrs (group attrs 2)))
 	(with-output-to-string (str)
-	  (loop for a in grouped-attrs do (format str " ~a=\"~a\"" (string-downcase (string (car a))) (cadr a)))))))
+	  (loop for a in grouped-attrs do (format str " ~(~a~)=\"~a\""  (car a) (cadr a)))))))
 
 (defun html-statement-p (form)
   "Return t if form is a list and begins with a keyword and the second value is a list."
@@ -32,26 +37,37 @@ If attrs is null, return \"\"."
   "Return t if the tag, being a keyword, is a void element."
   (if (find tag *void-elements*) t nil))
 
-(defun html (&rest statements)
-  (with-output-to-string (str)
-    (labels ((generate-html-tag (tag attrs &rest values)
-	       ;; first get the tag as a lowercase string and the attributes written correctly
-	       (let ((tag-string (string-downcase (string tag)))
-		     (attrs-html (attrs-to-html attrs)))
-		 ;; make difference in printing void elements and non-void elements
-		 (if (void-element-p tag)
-		     ;; is is a void-element, only print the tag and the attributes
-		     (format str "<~a~a>" tag-string attrs-html)
-		     (progn ;; it is a non-void element, print also the values and the end tag
-		       (format str "<~a~a>" tag-string attrs-html)
-		       (loop for val in values do (the-iterator val))
-		       (format str "</~a>" tag-string)))))
-	     (the-iterator (list-of-statements)
-	       ;; for each statement, if it is a html statement, call to-html. 
-	       ;; else, print the statement as it is
-	       (loop 
-		  for stmt in list-of-statements 
-		  do (if (html-statement-p stmt)
-			 (generate-html-tag (first stmt) (second stmt) (cddr stmt))
-			 (format str "~a" (eval stmt))))))
-      (the-iterator statements))))
+(defmacro create-attributes-string (attrs)
+  (with-gensyms (grouped-attrs attr stream)
+    (if (or (null attrs) (eql #\- attrs)) ""
+	`(with-output-to-string (,stream)
+	   (let ((,grouped-attrs (group ',attrs 2)))
+	     (loop for ,attr in ,grouped-attrs do (format ,stream " ~a=\"~a\"" 
+							  ;; if the first is a string, leave it as it is.
+							  ;; else make it a downcase string
+							  (if (stringp (car ,attr)) 
+							      (car ,attr)
+							      (string-downcase (string (car ,attr))))
+							  (cadr ,attr))))))))
+
+(defmacro html-2 (&rest statements)
+  (if (not (null statements))
+      (with-gensyms (str element attributes data)
+	  `(with-output-to-string (,str)
+	     ,@(loop 
+		  for s in statements
+		  if (html-statement-p s) collect `(let ((,element (string-downcase (first ',s)))
+							 (,attributes (create-attributes-string ,(second s)))
+							 (,data (html-2 ,@(cddr s))))
+						     (if (void-element-p ,element)
+							 (format ,str "<~a~a>" ,element ,attributes)
+							 (format ,str "<~a~a>~a</~a>" ,element ,attributes ,data ,element)))
+		  else collect `(format ,str "~a" ,s))))))
+
+(let ((foo "you've been fooed!"))
+  (labels ((monkey (arg) (format nil "The monkey says: ~s" arg)))
+    (html-2
+     "hey, " 
+     (:b () (monkey foo))
+     (:a (href "http://www.google.com") "This is a link to Google!")
+     (:p () (:h1 () "header") "text"))))
