@@ -16,11 +16,11 @@ stream, path, args and body works as with with-open-file."
      (with-open-file (,stream ,path ,@(if args args))
        ,@body)))
 
-(defun write-string (path string)
-  "Write the string to the given file and ensure the directories exist."
-  (with-open-file-and-ensured-directories (stream path :direction :output
-						  :if-exists :supersede)
-    (format path string)))
+;; (defun write-string (path string)
+;;   "Write the string to the given file and ensure the directories exist."
+;;   (with-open-file-and-ensured-directories (stream path :direction :output
+;; 						  :if-exists :supersede)
+;;     (format path string)))
 
 (defun write-container-xml (book-name)
   (write-string "META-INF/container.xml"
@@ -51,3 +51,57 @@ stream, path, args and body works as with with-open-file."
 							     book-name)))
 				    (:title () book-title)
 				    (:body () sections))))))
+
+(defun write-package-document (path metadata manifest spine
+			       &optional guide bindings)
+  "Create the package document and write it to path. metadata, manifest and
+spine should be the elements (ie <metadata>...</metadata>) of the respective
+tag. guide and bindings are by the EPUB standard optional."
+  (with-open-file-and-ensured-directories (stream path :direction :output
+						  :if-exists :supersede)
+    (generate-html (stream)
+		   "<?xml version=\"1.0\" encoding=\"UFT-8\"?>"
+		   (:package (xmlns "http://www.idpf.org/2007/opf"
+				    version "3.0"
+				    unique-identifier "uid")
+			     metadata
+			     manifest
+			     spine
+			     (if guide (generate-html
+					(stream)
+					(:guide () guide)))
+			     (if bindings (generate-html
+					   (stream)
+					   (:bindings bindings)))))))
+
+(defun make-keyword (name)
+  (values (intern (string name) :keyword)))
+
+(defmacro genif (form &optional add-dc)
+  `(if ,form
+       (xml (,(make-keyword (format nil "~:[~;dc:~]~a" add-dc form)) () ,form)))))
+
+(defun create-metadata (identifier title language modified-timestamp
+			&key meta link contributor coverage creator date
+			  description format publisher relation rights source
+			  object type)
+  (xml
+   (:metadata ()
+	      (:dc:identifier (id "uid") identifier)
+	      (genif title t)
+	      (genif language t)
+	      (genif meta)
+	      (:meta (property "dcterms:modified") modified-timestamp)
+	      (genif link)
+	      (genif contributor t)
+	      (genif coverage t)
+	      (genif creator t)
+	      (genif date t)
+	      (genif description t)
+	      (genif format t)
+	      (genif publisher t)
+	      (genif relation t)
+	      (genif rights t)
+	      (genif source t)
+	      (genif object t)
+	      (genif type t))))
