@@ -1,3 +1,6 @@
+;;; This testing framework was defined in Practical Common Lisp by Peter Seibel
+;;; (except for the naming of the gensyms).
+
 (defparameter *test-name* nil)
 
 (defun report-result (result form)
