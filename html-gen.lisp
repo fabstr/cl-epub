@@ -102,7 +102,14 @@ The tags can be nested:
 which is transformed to
 \"<div id=\"\"box\"\"><h1>header</h1><p>Lorem lipsum ...</p></div>\"
 
-If the element is a void element, the data is not written."
+If the element is a void element, the data is not written.
+
+The html generation takes place in the current lexical environment, thus
+  (let ((foo \"bar\"))
+    (labels ((my-func (arg) (format nil \"you said ~s\" arg)))
+      (html (:h1 () foo)
+  	    (:p () (my-func \"hello\")))))
+will return \"<h1>bar</h1><p>you said \"\"hello\"\"</p>\"."
   (with-gensyms (stream)
     `(with-output-to-string (,stream)
        (generate-html (,stream) ,@statements))))
