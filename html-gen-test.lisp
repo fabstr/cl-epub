@@ -3,6 +3,9 @@
    ;; this should work
    (equal t (html-statement-p '(:p () "foo")))
 
+   ;; and this
+   (equal t (html-statement-p '(:a (href "foo") "bar")))
+
    ;; check something that is not a list
    (equal nil (html-statement-p '"foo"))
 
@@ -12,10 +15,10 @@
    ;; check with not a keyword
    (equal nil (html-statement-p '(format nil "foo")))))
 
-(deftest t-attrs-to-html ()
+(deftest t-create-attributes-string ()
   (check
-    (string= "" (attrs-to-html ()))
-    (string= " foo=\"bar\"" (attrs-to-html '(foo "bar")))))
+    (string= "" (create-attributes-string ()))
+    (string= " foo=\"bar\"" (create-attributes-string (foo "bar")))))
 
 (deftest t-void-element-p ()
   (check
@@ -66,6 +69,12 @@
     ;; test no values is printed with void elements
     (string= "<br />" (html (:br () "this is not printed")))
 
+    ;; nothing should be printed for nil
+    (string= "" (html nil))
+    (string= "<p>foo</p><p>bar</p>" (html (:p () "foo")
+					  nil
+					  (:p () "bar")))
+
     ;; test a simple html page
     (string= "<html><head><title>title</title><meta these=\"are\" meta=\"tags\" /><link rel=\"stylesheet\" type=\"text/css\" href=\"css.css\" /></head><body><div id=\"box\"><h1>header</h1><p>paragraph</p></div><div id=\"foot\"><p>this is a foot</p></div></body></html>"
 	     (html (:html ()
@@ -105,11 +114,17 @@
 	(string= "<p>variable</p>" (html (:p () var)))
 	(string= "<p>function</p>" (html (:p () (func "function"))))))))
 
+(deftest t-xml ()
+  (check
+   (string= "<meta foo=\"bar\">monkeys eats bananas</meta>"
+	    (xml (:meta (foo "bar") "monkeys eats bananas")))))
+
 (deftest do-tests ()
   (check
     (t-html-statement-p)
-    (t-attrs-to-html)
+    (t-create-attributes-string)
     (t-void-element-p)
     (t-html-variable-and-functions)
     (t-generate-html)
+    (t-xml)
     (t-html)))
