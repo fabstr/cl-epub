@@ -31,8 +31,7 @@
 a list."
   (and (listp form)
        (keywordp (car form))
-       (or (listp (cadr form))
-	   (eql #\- (cadr form)))))
+       (listp (cadr form))))
 
 (defun void-element-p (tag)
   "Return t if the tag, being a string on the form \"html\", is a void element."
@@ -44,7 +43,7 @@ a list."
   "With a list (foo \"bar\" monkey \"banana\"), return the string
 ' foo=\"bar\" monkey=\"banana\"'. If attrs is null or #\-, return \"\"."
   (with-gensyms (grouped-attrs attr stream)
-    (if (or (null attrs) (eql #\- attrs)) ""
+    (if (null attrs) ""
 	(if (not (listp attrs))
 	    (error "Not a list: ~s" attrs)
 	    `(with-output-to-string (,stream)
@@ -59,7 +58,8 @@ a list."
 				   (string-downcase (string (car ,attr))))
 			       (cadr ,attr)))))))))
 
-(defmacro generate-html ((stream &key (close-void t)) &rest statements)
+(defmacro generate-html ((stream &key (close-void t))
+			 &rest statements)
   "Write html output to the stream. statements should be html statements or
 something that can be passed to format's \"~a\". If close-void is t, end void
 elements with a '\' (ie <meta ... />). Please see html for how the statements
@@ -69,6 +69,7 @@ should look."
 	`(progn
 	   ,@(loop
 		for s in statements
+		if (not (null s))
 		if (html-statement-p s)
 		collect `(let* ((,element (first ',s))
 			       (,element-string (string-downcase ,element))
@@ -105,3 +106,12 @@ If the element is a void element, the data is not written."
   (with-gensyms (stream)
     `(with-output-to-string (,stream)
        (generate-html (,stream) ,@statements))))
+
+(defmacro xml (&rest statements)
+  "Like html, except for the void elements have closing tags and content:
+<meta ...>...</meta> instead of <meta ... />"
+  ;; by binding void-elements to nil, no element can be found  in
+  ;; *void-elements* and void-element-p will always return nil ==> there are no
+  ;; void elements ==> all elements prints closing tags and content
+  `(let ((*void-elements* nil))
+     (html ,@statements)))
