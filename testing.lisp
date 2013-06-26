@@ -5,7 +5,8 @@
   result)
 
 (defmacro with-gensyms ((&rest names) &body body)
-  `(let ,(loop for n in names collect `(,n (gensym (concatenate 'string (string ',n) "-"))))
+  `(let ,(loop for n in names collect `(,n (gensym (format nil
+							   "~a" (string ',n)))))
      ,@body))
 
 (defmacro combine-results (&body forms)
