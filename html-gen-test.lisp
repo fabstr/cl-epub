@@ -1,5 +1,5 @@
 (deftest t-html-statement-p ()
-  (check 
+  (check
    ;; this should work
    (equal t (html-statement-p '(:p () "foo")))
 
@@ -8,12 +8,12 @@
 
    ;; check with args not a list
    (equal nil (html-statement-p '(:p "foo" "bar")))
-   
+
    ;; check with not a keyword
    (equal nil (html-statement-p '(format nil "foo")))))
 
 (deftest t-attrs-to-html ()
-  (check 
+  (check
     (string= "" (attrs-to-html ()))
     (string= " foo=\"bar\"" (attrs-to-html '(foo "bar")))))
 
@@ -38,39 +38,72 @@
     (equal t (void-element-p :wbr))))
 
 (deftest t-html ()
-  (check 
+  (check
     ;; test simple strings
     (string= "this is a string" (html "this is a string"))
     (string= "many strings" (html "many"     " "     "stri"    "ngs"))
 
     ;; test a simple case with no args
-    (string= "<p>a paragraph</p>" (html '(:p () "a paragraph")))
+    (string= "<p>a paragraph</p>" (html (:p () "a paragraph")))
 
     ;; test a simple case with args
-    (string= "<a href=\"http://www.google.com\">google</a>" 
-    	     (html '(:a (href "http://www.google.com") "google")))
+    (string= "<a href=\"http://www.google.com\">google</a>"
+    	     (html (:a (href "http://www.google.com") "google")))
 
     ;; test nested tags
     (string= "<p>a paragraph with a link to <a href=\"http://www.google.com\">google</a></p>"
-    	     (html '(:p () "a paragraph with a link to " (:a (href "http://www.google.com") "google"))))
-    
+    	     (html (:p () "a paragraph with a link to "
+		       (:a (href "http://www.google.com") "google"))))
+
     ;; test parallell tags
-    (string= "<h1>header</h1><p>paragraph</p>" (html '(:h1 () "header")
-						      ' (:p () "paragraph")))
-    
-    ;; test a void element
-    (string= "<input type=\"text\" value=\"write something\">" (html '(:input (type "text" value "write something"))))
+    (string= "<h1>header</h1><p>paragraph</p>" (html (:h1 () "header")
+						     (:p () "paragraph")))
+
+    ;; test a void element (and that is is closed)
+    (string= "<input type=\"text\" value=\"write something\" />"
+	     (html (:input (type "text" value "write something"))))
 
     ;; test no values is printed with void elements
-    (string= "<br>" (html '(:br () "this is not printed")))))
+    (string= "<br />" (html (:br () "this is not printed")))
 
-(defparameter *var* "variable")
-(defun func (arg) (string arg))
+    ;; test a simple html page
+    (string= "<html><head><title>title</title><meta these=\"are\" meta=\"tags\" /><link rel=\"stylesheet\" type=\"text/css\" href=\"css.css\" /></head><body><div id=\"box\"><h1>header</h1><p>paragraph</p></div><div id=\"foot\"><p>this is a foot</p></div></body></html>"
+	     (html (:html ()
+			  (:head ()
+				 (:title () "title")
+				 (:meta (these "are" meta "tags"))
+				 (:link (rel "stylesheet" type "text/css"
+					     href "css.css")))
+			  (:body ()
+				 (:div (id "box")
+				       (:h1 () "header")
+				       (:p () "paragraph"))
+				 (:div (id "foot")
+				       (:p () "this is a foot"))))))))
+
+(deftest t-generate-html ()
+  (check
+    ;; test the void tags are closed/not closed when
+    ;; calling generate-html with different options
+    (string= "<meta these=\"are\" meta=\"tags\" />"
+	     (with-output-to-string (str)
+	       (generate-html (str :close-void t)
+			      (:meta (these "are" meta "tags")))))
+    (string= "<meta these=\"are\" meta=\"tags\" />"
+	     (with-output-to-string (str)
+	       (generate-html (str)
+			      (:meta (these "are" meta "tags")))))
+    (string= "<meta these=\"are\" meta=\"tags\">"
+	     (with-output-to-string (str)
+	       (generate-html (str :close-void nil)
+			      (:meta (these "are" meta "tags")))))))
 
 (deftest t-html-variable-and-functions ()
-  (check 
-    (string= "<p>variable</p>" (html '(:p () *var*)))
-    (string= "<p>function</p>" (html '(:p () (func "function"))))))
+  (let ((var "variable"))
+    (labels ((func (arg) (format nil "~a" arg)))
+      (check
+	(string= "<p>variable</p>" (html (:p () var)))
+	(string= "<p>function</p>" (html (:p () (func "function"))))))))
 
 (deftest do-tests ()
   (check
@@ -78,4 +111,5 @@
     (t-attrs-to-html)
     (t-void-element-p)
     (t-html-variable-and-functions)
+    (t-generate-html)
     (t-html)))
