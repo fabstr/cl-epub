@@ -1,4 +1,4 @@
-(in-package :html-gen)
+;; (in-package :html-gen)
 
 ;; The void elements according to
 ;; http://www.w3.org/TR/html-markup/syntax.html#void-element
@@ -58,8 +58,7 @@ a list."
 				   (string-downcase (string (car ,attr))))
 			       (cadr ,attr)))))))))
 
-(defmacro generate-html ((stream &key (close-void t))
-			 &rest statements)
+(defmacro generate-html ((stream &key (close-void t)) &rest statements)
   "Write html output to the stream. statements should be html statements or
 something that can be passed to format's \"~a\". If close-void is t, end void
 elements with a '\' (ie <meta ... />). Please see html for how the statements
@@ -122,3 +121,11 @@ will return \"<h1>bar</h1><p>you said \"\"hello\"\"</p>\"."
   ;; void elements ==> all elements prints closing tags and content
   `(let ((*void-elements* nil))
      (html ,@statements)))
+
+(defmacro generate-xml ((&rest args) &rest statements)
+  "A mixture of generate-html and xml (ie *void-elements* are bound to nil)."
+  `(let ((*void-elements* nil))
+     (generate-html (,@args) ,@statements)))
+
+(defmacro xml-declaration (&rest attributes)
+  `(format nil "<?xml~a?>" (create-attributes-string ,attributes)))

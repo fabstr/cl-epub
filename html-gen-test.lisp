@@ -119,6 +119,18 @@
    (string= "<meta foo=\"bar\">monkeys eats bananas</meta>"
 	    (xml (:meta (foo "bar") "monkeys eats bananas")))))
 
+(deftest t-generate-xml ()
+  (check
+   (string= "<meta these=\"are\">meta tags</meta>"
+	    (with-output-to-string (str)
+	      (generate-xml (str) (:meta (these "are") "meta tags"))))))
+
+(deftest t-xml-declaration ()
+  (check
+    (string= "<?xml?>" (xml-declaration))
+    (string= "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+	     (xml-declaration version "1.0" encoding "UTF-8"))))
+
 (deftest do-tests ()
   (check
     (t-html-statement-p)
@@ -127,4 +139,6 @@
     (t-html-variable-and-functions)
     (t-generate-html)
     (t-xml)
+    (t-generate-xml)
+    (t-xml-declaration)
     (t-html)))
