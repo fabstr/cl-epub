@@ -1,3 +1,5 @@
 Content/
 book/
 *.*~
+
+.#epub.lisp
