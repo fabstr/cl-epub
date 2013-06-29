@@ -84,7 +84,7 @@ should look."
 						 :close-void ,close-void)
 						,@(cddr s))
 				 (format ,stream "</~a>" ,element-string))))
-		else collect `(format ,stream "~a" ,s))))))
+		else collect `(if ,s (format ,stream "~a" ,s) (format ,stream "")))))))
 
 (defmacro html (&rest statements)
   "Generate a string of the html.
