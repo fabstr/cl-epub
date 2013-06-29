@@ -31,16 +31,28 @@
 		 (read-line stream))))))
 
 (deftest t-write-package-document ()
-  (check
-    nil))
+  (let ((metadata (xml (:metadata () "this is metadata")))
+	(manifest (xml (:manifest () "this is manifest")))
+	(spine (xml (:spine () "this is spine")))
+	(guide (xml (:guide () "this is a guide")))
+	(bindings (xml (:bindings () "these are bindings"))))
+    (check
+     (progn
+       (write-package-document metadata manifest spine)
+       (with-open-file (stream *package-document-path*)
+	 (string= "<?xml version=\"1.0\" encoding=\"UFT-8\"?><package xmlns=\"http://www.idpf.org/2007/opf\" version=\"3.0\" unique-identifier=\"uid\"><metadata>this is metadata</metadata><manifest>this is manifest</manifest><spine>this is spine</spine></package>"
+		  (read-line stream))))
+     (progn
+       (write-package-document metadata manifest spine guide bindings)
+       (with-open-file (stream *package-document-path*)
+     	 (string= "<?xml version=\"1.0\" encoding=\"UFT-8\"?><package xmlns=\"http://www.idpf.org/2007/opf\" version=\"3.0\" unique-identifier=\"uid\"><metadata>this is metadata</metadata><manifest>this is manifest</manifest><spine>this is spine</spine><guide>this is a guide</guide><bindings>these are bindings</bindings></package>"
+		  (read-line stream)))))))
+
 
 (deftest t-make-keyword ()
   (check
-    nil))
-
-(deftest t-genif ()
-  (check
-    nil))
+    (eql :foo (make-keyword 'foo))
+    (eql :|foo| (make-keyword "foo"))))
 
 (deftest t-parameters ()
   (check
@@ -66,12 +78,20 @@
 	(source "let-source")
 	(object "let-object")
 	(type "let-type"))
-    (create-metadata identifier title language modified
-		     :meta meta :link link :contributor contributor
-		     :coverage coverage :creator creator :date date
-		     :description description :format format
-		     :publisher publisher :relation relation :rights rights
-		     :source source :object object :type type)))
+    (check
+      ;; try all the arguments
+      (string= "<dc:identifier id=\"uid\">let-identifier</dc:identifier><meta property=\"dcterms:modified\">today</meta><dc:title>let-title</dc:title><dc:language>let-language</dc:language><meta>let-meta</meta><link>let-link</link><dc:contributor>let-contributor</dc:contributor><dc:coverage>let-coverage</dc:coverage><dc:creator>let-creator</dc:creator><dc:date>let-date</dc:date><dc:description>let-description</dc:description><dc:format>let-format</dc:format><dc:publisher>let-publisher</dc:publisher><dc:relation>let-relation</dc:relation><dc:rights>let-rights</dc:rights><dc:source>let-source</dc:source><dc:object>let-object</dc:object><dc:type>let-type</dc:type>"
+   	       (create-metadata identifier title language modified
+				:meta meta :link link :contributor contributor
+				:coverage coverage :creator creator :date date
+				:description description :format format
+				:publisher publisher :relation relation
+				:rights rights :source source :object object
+				:type type))
+      ;; try some arguments
+      (string= "<dc:identifier id=\"uid\">let-identifier</dc:identifier><meta property=\"dcterms:modified\">today</meta><dc:title>let-title</dc:title><dc:language>let-language</dc:language><meta>let-meta</meta><dc:contributor>let-contributor</dc:contributor>"
+	       (create-metadata identifier title language modified
+				:meta meta :contributor contributor)))))
 
 (deftest t-epub ()
   (t-with-open-file-and-ensured-directories)
