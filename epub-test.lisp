@@ -57,7 +57,9 @@
 (deftest t-parameters ()
   (check
     (string= "Content/package-document.opf" *package-document-path*)
-    (string= "Content/content.xhtml" *content-path*)))
+    (string= "Content/content.xhtml" *content-path*)
+    (string= "nav" *nav-id*)
+    (string= "Content/nav.xhtml" *nav-path*)))
 
 (deftest t-create-metadata ()
   (let ((identifier "let-identifier")
@@ -80,7 +82,7 @@
 	(type "let-type"))
     (check
       ;; try all the arguments
-      (string= "<dc:identifier id=\"uid\">let-identifier</dc:identifier><meta property=\"dcterms:modified\">today</meta><dc:title>let-title</dc:title><dc:language>let-language</dc:language><meta>let-meta</meta><link>let-link</link><dc:contributor>let-contributor</dc:contributor><dc:coverage>let-coverage</dc:coverage><dc:creator>let-creator</dc:creator><dc:date>let-date</dc:date><dc:description>let-description</dc:description><dc:format>let-format</dc:format><dc:publisher>let-publisher</dc:publisher><dc:relation>let-relation</dc:relation><dc:rights>let-rights</dc:rights><dc:source>let-source</dc:source><dc:object>let-object</dc:object><dc:type>let-type</dc:type>"
+      (string= "<metadata><dc:identifier id=\"uid\">let-identifier</dc:identifier><meta property=\"dcterms:modified\">today</meta><dc:title>let-title</dc:title><dc:language>let-language</dc:language><meta>let-meta</meta><link>let-link</link><dc:contributor>let-contributor</dc:contributor><dc:coverage>let-coverage</dc:coverage><dc:creator>let-creator</dc:creator><dc:date>let-date</dc:date><dc:description>let-description</dc:description><dc:format>let-format</dc:format><dc:publisher>let-publisher</dc:publisher><dc:relation>let-relation</dc:relation><dc:rights>let-rights</dc:rights><dc:source>let-source</dc:source><dc:object>let-object</dc:object><dc:type>let-type</dc:type></metadata>"
    	       (create-metadata identifier title language modified
 				:meta meta :link link :contributor contributor
 				:coverage coverage :creator creator :date date
@@ -89,9 +91,45 @@
 				:rights rights :source source :object object
 				:type type))
       ;; try some arguments
-      (string= "<dc:identifier id=\"uid\">let-identifier</dc:identifier><meta property=\"dcterms:modified\">today</meta><dc:title>let-title</dc:title><dc:language>let-language</dc:language><meta>let-meta</meta><dc:contributor>let-contributor</dc:contributor>"
+      (string= "<metadata><dc:identifier id=\"uid\">let-identifier</dc:identifier><meta property=\"dcterms:modified\">today</meta><dc:title>let-title</dc:title><dc:language>let-language</dc:language><meta>let-meta</meta><dc:contributor>let-contributor</dc:contributor></metadata>"
 	       (create-metadata identifier title language modified
 				:meta meta :contributor contributor)))))
+
+(deftest t-create-item ()
+  (check
+    ;; check with the required args
+    (string= "<item id=\"id\" href=\"my href\" media-type=\"media type\"></item>"
+	     (create-item "id" "my href" "media type"))
+
+    ;; check with an optional arg
+    (string= "<item id=\"id\" href=\"my href\" media-type=\"media type\" properties=\"props\"></item>"
+	     (create-item "id" "my href" "media type" :properties "props"))
+
+    ;; test with all args
+    (string= "<item id=\"id\" href=\"my href\" media-type=\"media type\" fallback=\"fall\" properties=\"props\" media-overlay=\"media\"></item>"
+	     (create-item "id" "my href" "media type"
+			  :fallback "fall" :properties "props"
+			  :media-overlay "media"))))
+
+(deftest t-create-manifest ()
+  (check
+    (string= "<manifest><item id=\"nav\" href=\"nav.xhtml\" media-type=\"application/xhtml+xml\" properties=\"nav\"></item></manifest>"
+	     (create-manifest))
+    (string= "<manifest><item id=\"nav\" href=\"nav.xhtml\" media-type=\"application/xhtml+xml\" properties=\"nav\"></item>i1i2</manifest>"
+	     (create-manifest "i1" "i2"))))
+
+(deftest t-create-spine ()
+  (check
+    (string= "<spine></spine>" (create-spine))
+    (string= "<spine>i1i2</spine>" (create-spine "i1" "i2"))))
+
+(deftest t-create-itemref ()
+  (check
+    (string= "<itemref idref=\"ref\"></itemref>" (create-itemref "ref"))
+    (string= "<itemref idref=\"ref\" linear=\"no\"></itemref>"
+	     (create-itemref "ref" :linear "no"))
+    (string= "<itemref idref=\"ref\" linear=\"no\" id=\"id\" properties=\"props\"></itemref>"
+	     (create-itemref "ref" :linear "no" :id "id" :properties "props"))))
 
 (deftest t-epub ()
   (t-with-open-file-and-ensured-directories)
