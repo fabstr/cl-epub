@@ -4,7 +4,7 @@
    (equal t (html-statement-p '(:p () "foo")))
 
    ;; and this
-   (equal t (html-statement-p '(:a (href "foo") "bar")))
+   (equal t (html-statement-p '(:a ((:href "foo")) "bar")))
 
    ;; check something that is not a list
    (equal nil (html-statement-p '"foo"))
@@ -17,28 +17,41 @@
 
 (deftest t-create-attributes-string ()
   (check
+    ;; test with the empty list
     (string= "" (create-attributes-string ()))
-    (string= " foo=\"bar\"" (create-attributes-string (foo "bar")))))
+
+    ;; test with one attribute
+    (string= " foo=\"bar\"" (create-attributes-string ((:foo "bar"))))
+
+    ;; test with two attributes
+    (string= " foo=\"bar\" monkey=\"banana\""
+	     (create-attributes-string ((:foo "bar") (:monkey "banana"))))
+
+    ;; test with bound variables
+    (let ((foo "bar")
+	  (monkey "banana"))
+      (string= " foo=\"bar\" monkey=\"banana\""
+	       (create-attributes-string ((:foo foo) (:monkey monkey)))))))
 
 (deftest t-void-element-p ()
   (check
     ;; check all the void elements are found
-    (equal t (void-element-p :area))
-    (equal t (void-element-p :base))
-    (equal t (void-element-p :br))
-    (equal t (void-element-p :col))
-    (equal t (void-element-p :command))
-    (equal t (void-element-p :embed))
-    (equal t (void-element-p :hr))
-    (equal t (void-element-p :img))
-    (equal t (void-element-p :input))
-    (equal t (void-element-p :keygen))
-    (equal t (void-element-p :link))
-    (equal t (void-element-p :meta))
-    (equal t (void-element-p :param))
-    (equal t (void-element-p :source))
-    (equal t (void-element-p :track))
-    (equal t (void-element-p :wbr))))
+    (and (void-element-p :area)
+	 (void-element-p :base)
+	 (void-element-p :br)
+	 (void-element-p :col)
+	 (void-element-p :command)
+	 (void-element-p :embed)
+	 (void-element-p :hr)
+	 (void-element-p :img)
+	 (void-element-p :input)
+	 (void-element-p :keygen)
+	 (void-element-p :link)
+	 (void-element-p :meta)
+	 (void-element-p :param)
+	 (void-element-p :source)
+	 (void-element-p :track)
+	 (void-element-p :wbr))))
 
 (deftest t-html ()
   (check
@@ -51,12 +64,12 @@
 
     ;; test a simple case with args
     (string= "<a href=\"http://www.google.com\">google</a>"
-    	     (html (:a (href "http://www.google.com") "google")))
+    	     (html (:a ((:href "http://www.google.com")) "google")))
 
     ;; test nested tags
     (string= "<p>a paragraph with a link to <a href=\"http://www.google.com\">google</a></p>"
     	     (html (:p () "a paragraph with a link to "
-		       (:a (href "http://www.google.com") "google"))))
+		       (:a ((:href "http://www.google.com")) "google"))))
 
     ;; test parallell tags
     (string= "<h1>header</h1><p>paragraph</p>" (html (:h1 () "header")
@@ -64,7 +77,7 @@
 
     ;; test a void element (and that is is closed)
     (string= "<input type=\"text\" value=\"write something\" />"
-	     (html (:input (type "text" value "write something"))))
+	     (html (:input ((:type "text") (:value "write something")))))
 
     ;; test no values is printed with void elements
     (string= "<br />" (html (:br () "this is not printed")))
@@ -80,14 +93,14 @@
 	     (html (:html ()
 			  (:head ()
 				 (:title () "title")
-				 (:meta (these "are" meta "tags"))
-				 (:link (rel "stylesheet" type "text/css"
-					     href "css.css")))
+				 (:meta ((:these "are") (:meta "tags")))
+				 (:link ((:rel "stylesheet") (:type "text/css")
+					     (:href "css.css"))))
 			  (:body ()
-				 (:div (id "box")
+				 (:div ((:id "box"))
 				       (:h1 () "header")
 				       (:p () "paragraph"))
-				 (:div (id "foot")
+				 (:div ((:id "foot"))
 				       (:p () "this is a foot"))))))))
 
 (deftest t-generate-html ()
@@ -97,15 +110,15 @@
     (string= "<meta these=\"are\" meta=\"tags\" />"
 	     (with-output-to-string (str)
 	       (generate-html (str :close-void t)
-			      (:meta (these "are" meta "tags")))))
+			      (:meta ((:these "are") (:meta "tags"))))))
     (string= "<meta these=\"are\" meta=\"tags\" />"
 	     (with-output-to-string (str)
 	       (generate-html (str)
-			      (:meta (these "are" meta "tags")))))
+			      (:meta ((:these "are") (:meta "tags"))))))
     (string= "<meta these=\"are\" meta=\"tags\">"
 	     (with-output-to-string (str)
 	       (generate-html (str :close-void nil)
-			      (:meta (these "are" meta "tags")))))))
+			      (:meta ((:these "are") (:meta "tags"))))))))
 
 (deftest t-html-variable-and-functions ()
   (let ((var "variable"))
@@ -117,19 +130,19 @@
 (deftest t-xml ()
   (check
    (string= "<meta foo=\"bar\">monkeys eats bananas</meta>"
-	    (xml (:meta (foo "bar") "monkeys eats bananas")))))
+	    (xml (:meta ((:foo "bar")) "monkeys eats bananas")))))
 
 (deftest t-generate-xml ()
   (check
    (string= "<meta these=\"are\">meta tags</meta>"
 	    (with-output-to-string (str)
-	      (generate-xml (str) (:meta (these "are") "meta tags"))))))
+	      (generate-xml (str) (:meta ((:these "are")) "meta tags"))))))
 
 (deftest t-xml-declaration ()
   (check
     (string= "<?xml?>" (xml-declaration))
     (string= "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-	     (xml-declaration version "1.0" encoding "UTF-8"))))
+	     (xml-declaration (:version "1.0") (:encoding "UTF-8")))))
 
 (deftest do-tests ()
   (check

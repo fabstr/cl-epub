@@ -39,24 +39,24 @@ a list."
       t
       nil))
 
-(defmacro create-attributes-string (attrs)
-  "With a list (foo \"bar\" monkey \"banana\"), return the string
-' foo=\"bar\" monkey=\"banana\"'. If attrs is null or #\-, return \"\"."
-  (with-gensyms (grouped-attrs attr stream)
-    (if (null attrs) ""
-	(if (not (listp attrs))
-	    (error "Not a list: ~s" attrs)
-	    `(with-output-to-string (,stream)
-	       (let ((,grouped-attrs (group ',attrs 2)))
-		 (loop
-		    for ,attr in ,grouped-attrs
-		    do (format ,stream " ~a=\"~a\""
-			       ;; if the first is a string, leave it as it is.
-			       ;; else make it a downcase string
-			       (if (stringp (car ,attr))
-				   (car ,attr)
-				   (string-downcase (string (car ,attr))))
-			       (cadr ,attr)))))))))
+(defmacro create-attributes-string (attributes-list)
+  "Create a string with attributes for putting in an html tag.
+attributes-list should be on the form ((:name \"value\") (:something \"more\"))
+(I). Variables can be used instead of keywords and/or strings. Instead of a
+(name \"value\”), a string can be used:
+  ((:name \"value\") \"something=\"\"more\"\"\")
+(II). The name of the attribute will be printed in lower case, should a string
+ not be used (II)."
+  (with-gensyms (str)
+    `(with-output-to-string (,str)
+       ,@(loop
+	    for pair in attributes-list
+	    if (listp pair)
+	    ;; print the attribute name in lowercase
+	    collect `(format ,str " ~(~a~)=\"~a\"" ,(car pair) ,(cadr pair))
+	    else if (stringp pair)
+	    collect `(format ,str " ~a" ,pair)
+	    else do (error "~s should be a list or a string" pair)))))
 
 (defmacro generate-html ((stream &key (close-void t)) &rest statements)
   "Write html output to the stream. statements should be html statements or
@@ -84,7 +84,8 @@ should look."
 						 :close-void ,close-void)
 						,@(cddr s))
 				 (format ,stream "</~a>" ,element-string))))
-		else collect `(if ,s (format ,stream "~a" ,s) (format ,stream "")))))))
+		else collect `(if ,s (format ,stream "~a" ,s)
+				  (format ,stream "")))))))
 
 (defmacro html (&rest statements)
   "Generate a string of the html.
