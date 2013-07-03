@@ -1,5 +1,6 @@
 (defun test-cleanup ()
-  (dolist (file '("mimetype" "META-INF/container.xml"))
+  (dolist (file (list *container-xml-path* *package-document-path*
+		      *content-path* *nav-path*))
     (delete-file file)))
 
 (deftest t-write-mimetype ()
@@ -20,14 +21,21 @@
 	       (read-line stream)))))
 
 (deftest t-write-content ()
-  (let ((*book-title* "this is a book title")
-	(*sections* (html (:section () "section1")
-			  (:section () "section2")
-			  (:section () "section3"))))
+  (let* ((*book-title* "this is a book title")
+	 (p1 (make-instance 'Paragraph :id 1 :text (html (:p () "p1"))))
+	 (p2 (make-instance 'Paragraph :id 2 :text (html (:p () "p2"))))
+	 (p3 (make-instance 'Paragraph :id 3 :text (html (:p () "p3"))))
+	 (p4 (make-instance 'Paragraph :id 4 :text (html (:p () "p4"))))
+	 (*sections* (list (make-instance 'Section
+					  :id 0
+					  :paragraphs (list p1 p2))
+			   (make-instance 'Section
+					  :id 1
+					  :paragraphs (list p3 p4)))))
     (write-content)
     (with-open-file (stream *content-path*)
       (check
-	(string= "<?xml version=\"1.0\" encoding=\"UTF-8\"?><html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" lang=\"en\" xmlns:epub=\"http://www.idpf.org/2007/ops\"><head><meta charset=\"utf-8\"></meta><title>this is a book title</title><link rel=\"stylesheet\" type=\"text/css\" href=\"css.css\"></link></head><body><section>section1</section><section>section2</section><section>section3</section></body></html>"
+	(string= "<?xml version=\"1.0\" encoding=\"UTF-8\"?><html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" lang=\"en\" xmlns:epub=\"http://www.idpf.org/2007/ops\"><head><meta charset=\"utf-8\"></meta><title>this is a book title</title><link rel=\"stylesheet\" type=\"text/css\" href=\"css.css\"></link></head><body><section id=\"s0\"><p>p1</p><p>p2</p></section><section id=\"s1\"><p>p3</p><p>p4</p></section></body></html>"
 		 (read-line stream))))))
 
 (deftest t-write-package-document ()
@@ -130,6 +138,68 @@
 	     (create-itemref "ref" :linear "no"))
     (string= "<itemref idref=\"ref\" linear=\"no\" id=\"id\" properties=\"props\"></itemref>"
 	     (create-itemref "ref" :linear "no" :id "id" :properties "props"))))
+
+(deftest t-section ()
+  (let ((s1 (make-instance 'Section :id "id"
+			   :paragraphs '("these are" "my paragraphs")))
+	(s2 (make-instance 'Section :id "id2" :add-to-toc t
+			   :paragraphs '("my paragraphs" "are short"))))
+    (check
+      ;; test the readers of the Section class
+      (string= "id" (section-id s1))
+      (eql nil (section-add-to-toc s1))
+      (eql t (section-add-to-toc s2))
+      (equal '("these are" "my paragraphs") (section-paragraphs s1)))))
+
+(deftest t-defsection ()
+  ;; test the defsection macro works
+  (let ((*sections* nil))
+    (defsection ("my id" :add-to-toc t) "these" "are" "my" "paragraphs")
+    (check
+      ;; test the length of *sections* is 1
+      (eql nil (cdr *sections*))
+
+      ;; test the fields of the section
+      (string= "my id" (section-id (car *sections*)))
+      (eql t (section-add-to-toc (car *sections*)))
+      (equal '("these" "are" "my" "paragraphs")
+	     (section-text (car *sections*))))))
+
+(deftest t-section-to-html ()
+  (let ((*sections* nil))
+    (let ((sec (make-instance 'Section :id "my id" :add-to-toc t
+			      :text '("this is my sentence "
+				      "and some more words"))))
+      (check
+	(string= "<section id=\"my id\">this is my sentence and some more words</section>"
+		 (section-to-html sec))))))
+
+(deftest t-add-paragraph-to-section ()
+  (let ((s (make-instance 'Section :id "id" :paragraphs nil))
+	(p1 (make-instance 'Paragraph :id 0 :text "one"))
+	(p2 (make-instance 'Paragraph :id 1 :text "two"))
+	(p3 (make-instance 'Paragraph :id 3 :text "three")))
+    (add-paragraph-to-section s p3)
+    (add-paragraph-to-section s p2)
+    (add-paragraph-to-section s p1)
+    (check
+      (string= "one" (paragraph-text (first (section-paragraphs s))))
+      (string= "two" (paragraph-text (second (section-paragraphs s))))
+      (string= "three" (paragraph-text (third (section-paragraphs s)))))))
+
+(deftest t-get-sorted-paragraphs ()
+  (let ((s (make-instance 'Section :id "id" :paragraphs nil)))
+    (add-paragraph-to-section s (make-instance 'Paragraph :id 2 :text "2"))
+    (add-paragraph-to-section s (make-instance 'Paragraph :id 0 :text "0"))
+    (add-paragraph-to-section s (make-instance 'Paragraph :id 1 :text "1"))
+    (add-paragraph-to-section s (make-instance 'Paragraph :id 3 :text "3"))
+    (let ((sorted (mapcar #'(lambda (p)	(paragraph-text p))
+			  (get-sorted-paragraphs s))))
+      (check
+	(string= "0" (first sorted))
+	(string= "1" (second sorted))
+	(string= "2" (third sorted))
+	(string= "3" (fourth sorted))))))
 
 (deftest t-epub ()
   (t-with-open-file-and-ensured-directories)
