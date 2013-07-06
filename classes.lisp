@@ -5,7 +5,7 @@
     :documentation "The index of the element. The index is used for sorting the
 sections and define the reading order, ie a section with a low index will be
 placed before a section with a higher index. index should be an integer."
-    :reader section-id)
+    :reader section-index)
    (add-to-toc-p
     :initarg :add-to-toc-p
     :initform nil
@@ -125,6 +125,11 @@ have <p> tags, ie text is \"<p>lorem lipsum...</p>\"."
     :initform nil
     :accessor metadata-link
     :documentation "The link content of the metadata element.")
+   (contributor
+    :initarg :contributor
+    :initform nil
+    :accessor metadata-contributor
+    :documentation "The contributor element of the metadata element")
    (coverage
     :initarg :coverage
     :initform nil
@@ -170,11 +175,11 @@ have <p> tags, ie text is \"<p>lorem lipsum...</p>\"."
     :initform nil
     :accessor metadata-source
     :documentation "The source content of the metadata element.")
-   (object
-    :initarg :object
+   (subject
+    :initarg :subject
     :initform nil
-    :accessor metadata-object
-    :documentation "The object content of the metadata element.")
+    :accessor metadata-subject
+    :documentation "The subject content of the metadata element.")
    (type
     :initarg :type
     :initform nil
@@ -199,7 +204,8 @@ for the section is used as key in the hash table.")
     "The metadata of the book, to be put in the package document.")
    (manifest
     :accessor epub-manifest
-    :initform (make-hash-table)
+    ;; the id of each item is in string form, therefore #'equal must be the test
+    :initform (make-hash-table :test #'equal)
     :documentation "The manifest, to be put in the package document.")
    (spine
     :accessor epub-spine
