@@ -45,8 +45,7 @@ printed to a string).
 ## Multiple attributes
 <a id="multiple-attributes"></a>
 ```lisp
-(html (:a ((:href "http://www.example.com") (:id "the-first-link"))
-          "target"))
+(html (:a ((:href "http://www.example.com") (:id "the-first-link")) "target"))
 ```
 is translated to
 ```
@@ -64,7 +63,7 @@ is translated to
 "<h1>Header</h1><p>a paragraph</p>"
 ```
 
-Since xml parses shouldn't mind (lack of) indentation and separation the
+Since xml parses shouldn't mind (lack of) indentation and separation, the
 elements are printed in a continious string.
 
 ## Child elements
@@ -189,7 +188,6 @@ As a consequense functions calls can be used:
   (format nil "You called with arg=~s" arg))
 (html (:p () (my-function "foo")))
 ```
-
 is transformed into
 ```
 "<p>You called with arg=\"foo\"</p>"
