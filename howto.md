@@ -10,7 +10,7 @@ Please don't use defparameter when not appropriate.
 
 
 ## What you need
-[what-you-need]
+[what-you-need]: "What you need"
 1. The paragraphs for the book.
 2. The sections for the book (which are made up of the paragraphs)
 3. The required elements for the metadata:
@@ -19,10 +19,10 @@ Please don't use defparameter when not appropriate.
  - a timestamp on when the content was last modified
 
 ## How to put the pieces together
-[put-pieces-together]
+[put-pieces-together]: "How to put the pieces together"
 
 ### Creating a paragraph
-[creating-a-paragraph]
+[creating-a-paragraph]: "How to create a paragraph"
 To create a paragraph two things are needed: the text and the index of the
 paragraph. The index specifies in what order they are read from the section, ie
 a section that comes before another should have a lower index.
@@ -46,6 +46,7 @@ And another:
 ```
 
 ### Creating a section
+[creating-a-section]: "How to create a section"
 Each section consists of one or more paragraphs and must also have a index. A
 section can be added to the table of contents.
 
@@ -74,6 +75,7 @@ A section that is to be in the table of contents:
 ```
 
 ### Adding section to the book
+[add-section-to-book]: "How to add a section to the book"
 Assuming we have \*section1\*, \*section2\* and \*book\*, just do
 
 ```lisp
@@ -82,6 +84,7 @@ Assuming we have \*section1\*, \*section2\* and \*book\*, just do
 ```
 
 ### Adding the metadata
+[add-metadata]: "How to add the metadata"
 There are four metadata elements that are required for an epub book:
 
  - The unique identifier
@@ -121,6 +124,7 @@ We assume we have an Epub object bound to \*book\*.
 **to be written (and implemented)**
 
 ### Add the pieces together
+[add-pieces-together]: "How to make it an epub file"
 First you need to create an epub object:
 
 ```lisp
@@ -137,6 +141,7 @@ Then add the sections:
 Third add the metadata **to be implemented**
 
 ## How to save as .epub
+[save-as-epub]: "How to write everything to disk"
 Just call
 
 ```lisp
