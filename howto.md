@@ -9,17 +9,19 @@
    - [Adding the metadata](#adding-the-metadata)
    - [Add the pieces together](#add-the-pieces-together)
  - [How to save as epub](#how-to-save-as-epub)
+ - [Links](#links)
 
 Please don't use defparameter when not appropriate.
 
 ## What you need
 <a id="what-you-need"></a>
+
 1. The paragraphs for the book.
 2. The sections for the book (which are made up of the paragraphs)
 3. The required elements for the metadata:
- - A unique identifier, the title of the book
- - the language of the book
- - a timestamp on when the content was last modified
+   - A unique identifier, the title of the book
+   - The language of the book
+   - A timestamp on when the content was last modified
 
 ## How to put the pieces together
 <a id="how-to-put-the-pieces-together"></a>
@@ -55,7 +57,7 @@ section can be added to the table of contents.
 When the section has been intansiated, the paragraps should be added.
 
 If the section is to be in the table of contents, it should have a title as
-described [here](http://www.idpf.org/epub/30/spec/epub30-contentdocs.html#sec-xhtml-nav-def).
+described [here][1].
 
 #### Examples
 We assume that the paragraphs from above are bound to \*par1\* and \*par2\*.
@@ -95,30 +97,14 @@ There are four metadata elements that are required for an epub book:
  - A timestamp of when the book was last modified
 
 In addition there are many other (though optional) elements:
-
- - identifier
- - title
- - language
- - modified-timestamp
- - meta
- - link
- - contributor
- - coverage
- - creator
- - date
- - description
- - format
- - publisher
- - relation
- - rights
- - source
- - subject
- - type
+identifier, title, language, modifiedtimestamp, meta, link, contributor,
+coverage, creator, date, description, format, publisher, relation, rights,
+source, subject, type
 
 More information about the contents of these elements:
 
- - [The metadata element](http://www.idpf.org/epub/30/spec/epub30-publications.html#sec-metadata-elem)
- - [The optional elements](http://www.idpf.org/epub/30/spec/epub30-publications.html#sec-opf-dcmes-optional).
+ - [The metadata element][2]
+ - [The optional elements][3]
 
 #### Examples
 We assume we have an Epub object bound to \*book\*.
@@ -149,3 +135,16 @@ Just call
 ```lisp
 (write-epub *book*)
 ```
+
+## Links
+<a id="links"></a>
+
+- [The title of a section][1]
+- [The metadata element][2]
+- [The optional metadata elements][3]
+- [The epub specification][4]
+
+[1]: http://www.idpf.org/epub/30/spec/epub30-contentdocs.html#sec-xhtml-nav-def "The title of a section"
+[2]: http://www.idpf.org/epub/30/spec/epub30-publications.html#sec-metadata-elem "The metadata element"
+[3]: http://www.idpf.org/epub/30/spec/epub30-publications.html#sec-opf-dcmes-optional "The optional elements"
+[4]: http://www.idpf.org/epub/30/spec/ "The epub specification"
