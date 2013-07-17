@@ -21,3 +21,7 @@ package-document.opf
 *.lisp#
 
 .#html-gen.lisp
+
+*.md#
+
+.#howto.md
