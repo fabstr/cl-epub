@@ -41,7 +41,8 @@ How to create a paragraph:
 
 ```lisp
 (defparameter *par1*
-  (make-instance 'Paragraph
+  (make-instance
+	'Paragraph
     :index 0
     :text "<p>This is the paragraph. Please note the p element.</p>"))
 ```
@@ -50,7 +51,8 @@ And another:
 
 ```lisp
 (defparameter *par2*
-  (make-instance 'Paragraph
+  (make-instance
+	'Paragraph
     :index 1
 	:text "<p>Is there any need for multiple paragraphs?</p>"))
 ```
@@ -80,7 +82,8 @@ A section that is to be in the table of contents:
 
 ```lisp
 (defparameter *section2*
-  (make-instance 'Section
+  (make-instance
+	'Section
     :index 1
     :add-to-toc-p t
 	:title "<a href=\"Content.xhtml#par1\">The second section</a>"))
