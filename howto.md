@@ -174,6 +174,9 @@ and your done!
 
 ## A complete example
 <a id="a-complete-example"></a>
+The code can be downloaded from
+[complete-example.lisp](https://github.com/fabstr/cl-epub/blob/master/complete-example.lisp).
+
 First we need some paragraphs:
 ```lisp
 (defparameter *par1* (make-instance 'Paragraph
