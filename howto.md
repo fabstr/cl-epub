@@ -1,4 +1,4 @@
-# How to create an epub book:
+# How to create an epub book
 
 ## Table of contents
  - [What you need](#what-you-need)
@@ -146,8 +146,10 @@ Third add the metadata **to be implemented**
 Just call
 
 ```lisp
-(write-epub *book*)
+(write-epub *book* "path/to/book.epub")
 ```
+
+and your done!
 
 ## Links
 <a id="links"></a>
