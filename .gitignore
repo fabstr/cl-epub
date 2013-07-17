@@ -19,3 +19,5 @@ package-document.opf
 #html-gen.lisp#
 
 *.lisp#
+
+.#html-gen.lisp
