@@ -40,13 +40,19 @@ Both :index and :text must be supplied when creating a paragraph.
 How to create a paragraph:
 
 ```lisp
-(defparameter *par1* (make-instance 'Paragraph :index 0 :text "<p>This is the paragraph. Please note the p element.</p>"))
+(defparameter *par1*
+  (make-instance 'Paragraph
+    :index 0
+    :text "<p>This is the paragraph. Please note the p element.</p>"))
 ```
 
 And another:
 
 ```lisp
-(defparameter *par2* (make-instance 'Paragraph :index 1 :text "<p>Is there any need for multiple paragraphs?</p>"))
+(defparameter *par2*
+  (make-instance 'Paragraph
+    :index 1
+	:text "<p>Is there any need for multiple paragraphs?</p>"))
 ```
 
 ### Creating a section
@@ -73,7 +79,11 @@ Create a section and add the paragraphs:
 A section that is to be in the table of contents:
 
 ```lisp
-(defparameter *section2* (make-instance 'Section :index 0 :add-to-toc-p t :title "<a href=\"Content.xhtml#par1\">The second section</a>"))
+(defparameter *section2*
+  (make-instance 'Section
+    :index 1
+    :add-to-toc-p t
+	:title "<a href=\"Content.xhtml#par1\">The second section</a>"))
 (add-paragraph *section2* *par1*)
 (add-paragraph *section2* *par2*)
 ```
