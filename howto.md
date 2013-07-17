@@ -110,9 +110,9 @@ There are four metadata elements that are required for an epub book:
  - A timestamp of when the book was last modified
 
 In addition there are many other (though optional) elements:
-identifier, title, language, modifiedtimestamp, meta, link, contributor,
+*identifier, title, language, modifiedtimestamp, meta, link, contributor,
 coverage, creator, date, description, format, publisher, relation, rights,
-source, subject, type
+source, subject, type*
 
 More information about the contents of these elements:
 
