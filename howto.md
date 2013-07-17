@@ -19,7 +19,8 @@ Please don't use defparameter when not appropriate.
 1. The paragraphs for the book.
 2. The sections for the book (which are made up of the paragraphs)
 3. The required elements for the metadata:
-   - A unique identifier, the title of the book
+   - A unique identifier
+   - The title of the book
    - The language of the book
    - A timestamp on when the content was last modified
 
