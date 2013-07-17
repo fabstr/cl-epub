@@ -9,6 +9,7 @@
    - [Adding the metadata](#adding-the-metadata)
    - [Add the pieces together](#add-the-pieces-together)
  - [How to save as epub](#how-to-save-as-epub)
+ - [A complete example](#a-complete-example)
  - [Links](#links)
 
 Please don't use defparameter when not appropriate.
@@ -170,6 +171,74 @@ Just call
 ```
 
 and your done!
+
+## A complete example
+<a id="a-complete-example"></a>
+First we need some paragraphs:
+```lisp
+(defparameter *par1* (make-instance 'Paragraph
+				    :index 0
+				    :text "<p>This is the first paragrah</p>"))
+(defparameter *par2* (make-instance 'Paragraph
+				    :index 1
+				    :text "<p>This is the second paragrah</p>"))
+(defparameter *par3* (make-instance 'Paragraph
+				    :index 0
+				    :text "<p>This is the third paragrah</p>"))
+(defparameter *par4* (make-instance 'Paragraph
+				    :index 1
+				    :text "<p>This is the fourth paragrah</p>"))
+```
+
+Then some sections (which are chapters)
+```lisp
+(defparameter *chap1*
+  (make-instance 'Section
+		 :index 0
+		 :add-to-toc-p t
+		 :title "<a href=\"Content.xhtml#chap1\">Chapter 1</a>"))
+(defparameter *chap1*
+  (make-instance 'Section
+		 :index 1
+		 :add-to-toc-p t
+		 :title "<a href=\"Content.xhtml#chap2\">Chapter 2</a>"))
+```
+
+Add the paragraphs to the sections:
+```lisp
+(add-paragraph *chap1* *par1*)
+(add-paragraph *chap1* *par2*)
+
+(add-paragraph *chap2* *par3*)
+(add-paragraph *chap2* *par4*)
+```
+
+Create the book object:
+```lisp
+(defparameter *book* (make-instance 'Epub))
+```
+
+Add the sections
+```lisp
+(add-section *book* *chap1*)
+(add-section *book* *chap2*)
+```
+
+Add the metadata
+```lisp
+(let ((md (epub-metadata *book*)))
+  (setf (metadata-identifier md) "uuid:0001")
+  (setf (metadata-title md) "The book title")
+  (setf (metadata-language md) "en")
+  (setf (metadata-modified-timestamp md) "Ons 17 Jul 2013 22:10:46 CEST")
+  (setf (metadata-creator md) "Lisp Y. Guy"))
+```
+
+Finally write everything to disk
+```lisp
+(write-epub *book* "my-book.epub")
+```
+
 
 ## Links
 <a id="links"></a>
