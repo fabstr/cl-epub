@@ -160,23 +160,23 @@ index."))
 			     (:unique-identifier "uid"))
 			    (serialize-to-html (epub-metadata e))
 			    (manifest-to-html e)
-			    (spine-to-html e))))))
+			    (spine-to-html e)))))
 
 (defun write-container-xml (path)
   "Write the container.xml document to path (should be META-INF/container.xml.)"
-  (ensure-directories-exist "META-INF/container.xml")
+  (ensure-directories-exist path)
   (with-open-file (stream path :direction :output :if-exists :supersede)
-      (generate-xml
-       (stream)
-       (xml-declaration (:version "1.0") (:encoding "UTF-8"))
-       (:container
-	((:xmlns "urn:oasis:names:tc:opendocument:xmlns:container")
-	 (:version "1.0"))
-	(:rootfiles
-	 ()
-	 (:rootfile
-	  ((:full-path "Content/package-document.opf")
-	   (:media-type "application/oebps-package+xml"))))))))
+    (generate-xml
+     (stream)
+     (xml-declaration (:version "1.0") (:encoding "UTF-8"))
+     (:container
+      ((:xmlns "urn:oasis:names:tc:opendocument:xmlns:container")
+       (:version "1.0"))
+      (:rootfiles
+       ()
+       (:rootfile
+	((:full-path "Content/package-document.opf")
+	 (:media-type "application/oebps-package+xml"))))))))
 
 (defun write-mimetype (path)
   (with-open-file (stream path :direction :output :if-exists :supersede)
@@ -239,3 +239,14 @@ index."))
 		       (error
 			"A title of a section must not be the empty string.")
 		       (format stream (xml (:li () title))))))))))))))
+
+(defgeneric write-epub (Epub path)
+  (:documentation "Write the epub book to the folder pointed to by path. path
+should NOT have a traling '/'."))
+(defmethod write-epub ((e Epub) path)
+  (write-mimetype (concatenate 'string path "/mimetype"))
+  (write-container-xml (concatenate 'string path "/META-INF/container.xml"))
+  (write-package-document e (concatenate
+			     'string
+			     "/Content/package-document.opf"))
+  (write-content e (concatenate 'string "Content/content.xml")))
