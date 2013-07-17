@@ -5,7 +5,7 @@ in a lispy way in the current lexical environment.
 
 The html generation takes up O(n) space.
 
-Table of contents:
+## Table of contents:
 - [A simple example](#a-simple-example)
 - [An attribute](#an-attribute)
 - [Multiple attributes](#multiple-attributes)
