@@ -158,7 +158,7 @@ Then add the sections:
 (add-section *book* *section2*)
 ```
 
-Third add the metadata **to be implemented**
+Third, add the metadata as described above.
 
 ## How to save as .epub
 <a id="how-to-save-as-epub"></a>
