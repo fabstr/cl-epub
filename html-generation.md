@@ -14,6 +14,7 @@ The html generation takes up O(n) space.
 - [A larger example](#a-larger-example)
 - [Variables](#variables)
 - [More formal grammar](#more-formal-grammar)
+- [Calling of functions](#calling-of-functions)
 - [The difference between html and xml](#the-difference-between-html-and-xml)
 - [generate-html and generate-xml](#generate-html-and-generate-xml)
 - [Creating an xml declaration](#creating-an-xml-declaration)
@@ -182,7 +183,12 @@ passed through format:
 ```
 Where stream is bound via *with-output-to-string*.
 
-As a consequense functions calls can be used:
+As a consequense functions calls can be used.
+
+## Calling of functions
+<a id="calling-of-functions"></a>
+A function that returns (something that format can print to a) string can be
+called:
 ```lisp
 (defun my-function (arg)
   (format nil "You called with arg=~s" arg))
