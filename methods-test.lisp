@@ -286,7 +286,7 @@
 	(string= "<?xml version=\"1.0\" encoding=\"UTF-8\"?><html xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:epub=\"http://www.idpf.org/2007/ops\"><head><meta charset=\"utf-8\"></meta></head><body><nav epub:type=\"toc\" id=\"toc\"><ol><li>s1</li><li>s2</li><li>s3</li></ol></nav></body></html>"
 		 (read-line stream))))))
 
-(deftest test-all ()
+(deftest do-test-methods ()
   (check
     (t-add-section)
     (t-add-item-to-manifest)
