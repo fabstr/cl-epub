@@ -144,7 +144,7 @@
     (string= "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 	     (xml-declaration (:version "1.0") (:encoding "UTF-8")))))
 
-(deftest do-tests ()
+(deftest do-html-gen-tests ()
   (check
     (t-html-statement-p)
     (t-create-attributes-string)
