@@ -3,3 +3,17 @@ book/
 *.*~
 
 .#epub.lisp
+
+#html-gen.lisp#
+
+#html-gen.lisp#
+
+META-INF/container.xml
+
+mimetype
+
+nav.xhtml
+
+package-document.opf
+
+#html-gen.lisp#
