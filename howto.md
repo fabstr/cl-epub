@@ -109,6 +109,8 @@ There are four metadata elements that are required for an epub book:
  - The language
  - A timestamp of when the book was last modified
 
+To add the the metadata, use the accessors of the metadata class.
+
 In addition there are many other (though optional) elements:
 *identifier, title, language, modifiedtimestamp, meta, link, contributor,
 coverage, creator, date, description, format, publisher, relation, rights,
@@ -122,7 +124,24 @@ More information about the contents of these elements:
 #### Examples
 We assume we have an Epub object bound to \*book\*.
 
-**to be written (and implemented)**
+To set the required metadata elements:
+
+```lisp
+(let ((metadata (epub-metadata *book*)))
+  (setf (metadata-identifier metadata) "my-uuid")
+  (setf (metadata-title) "My super awesome book")
+  (setf (metadata-language) "en")
+  (setf (metadata-modified-timestamp) "Ons 17 Jul 2013 22:10:46 CEST"))
+```
+
+To add an author to the book:
+
+```lisp
+(setf (metadata-creator (epub-metadata *book*)) "The Author")
+```
+
+Please see the documentation for the Metadata class for the rest of the
+elements.
 
 ### Add the pieces together
 <a id="add-the-pieces-together"></a>
