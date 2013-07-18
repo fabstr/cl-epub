@@ -41,8 +41,14 @@ in order, the one that should be read first is to be added first."))
 (defmethod serialize-to-html ((i Itemref))
   (with-output-to-string (str)
     (format str "<itemref idref=\"~a\"" (itemref-idref i))
-    (if (itemref-linear i)
-	(format str " linear=\"~a\"" (itemref-linear i)))
+
+    ;; linear should be "yes" or "no"
+    (let ((linear (itemref-linear i)))
+      (if (not (or (string= "yes" linear)
+		   (string= "no" linear)))
+	  (error "linear should be ~s or ~s in ~s." "yes" "no" i))
+      (format str " linear=\"~a\"" linear))
+
     (if (itemref-id i)
 	(format str " id=\"~a\"" (itemref-id i)))
     (if (itemref-properties i)
@@ -244,9 +250,17 @@ index."))
   (:documentation "Write the epub book to the folder pointed to by path. path
 should NOT have a traling '/'."))
 (defmethod write-epub ((e Epub) path)
+  ;; before we write anything to disk, add Content.xml to manifest and spine
+  (add-item-to-manifest e (make-instance 'Item
+					 :id "content-xhtml"
+					 :href "Content.xhtml"
+					 :media-type "text/xhtml"))
+  (add-itemref-to-spine e (make-instance 'Itemref
+					 :idref "content-xhtml"))
+
   (write-mimetype (concatenate 'string path "/mimetype"))
   (write-container-xml (concatenate 'string path "/META-INF/container.xml"))
   (write-package-document e (concatenate
 			     'string
-			     "/Content/package-document.opf"))
-  (write-content e (concatenate 'string "Content/content.xml")))
+			     path "/Content/package-document.opf"))
+  (write-content e (concatenate 'string path "/Content/Content.xhtml")))
