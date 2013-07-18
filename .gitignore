@@ -25,3 +25,5 @@ package-document.opf
 *.md#
 
 .#howto.md
+
+.#complete-example.lisp
