@@ -18,7 +18,7 @@
 		 :index 0
 		 :add-to-toc-p t
 		 :title "<a href=\"Content.xhtml#chap1\">Chapter 1</a>"))
-(defparameter *chap1*
+(defparameter *chap2*
   (make-instance 'Section
 		 :index 1
 		 :add-to-toc-p t
